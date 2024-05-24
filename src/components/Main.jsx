@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useContext } from 'react';
+import Select from 'react-select'
 import * as es from './elasticsearch.js';
 import Feedback from './Feedback.jsx';
 import LanguageContext from './LanguageContext.jsx';
@@ -14,6 +15,9 @@ function Main() {
     let selectedBrand = '';
     let selectedModel = '';
     let selectedYear = '';
+    const [brands, setBrands] = useState([]);
+    const [models, setModels] = useState([]);
+    const [years, setYears] = useState([]);
     
     const [initialModelSelectorHTML, setInitialModelSelectorHTML] = useState('');
     const [initialYearSelectorHTML, setInitialYearSelectorHTML] = useState('');
@@ -22,6 +26,27 @@ function Main() {
     const yearSelectorRef = useRef(null);
 
     const [showFeedback, setShowFeedback] = useState(false);
+
+    useEffect(() => {
+        es.populateBrandSelector().then(brands => {
+            const options = brands.map(brand => ({ value: brand, label: brand }));
+            setBrands(options);
+        });
+    }, []);
+
+    useEffect(() => {
+        es.populateModelSelector().then(models => {
+            const options = models.map(model => ({ value: model, label: model }));
+            setModels(options);
+        });
+    }, []);
+
+    useEffect(() => {
+        es.populateYearSelector().then(years => {
+            const options = years.map(year => ({ value: year, label: year }));
+            setYears(options);
+        });
+    }, []);
 
     useEffect(() => {
         // Initialize the innerHTML of the selectors once the component has mounted
@@ -136,15 +161,30 @@ function Main() {
             <button id="searchByBrandModelYear" className="text-button" onClick={handleSearchByClick}>{translations[language].searchByBMY}</button>
 
             <div id="brandModelYearSelectors" style={{ display: 'none' }}>
-            <select id="brandSelector" disabled onChange={handleBrandChange}>
-                <option value="">{translations[language].selectBrand}</option>
-            </select>
-            <select id="modelSelector" ref={modelSelectorRef} disabled onChange={handleModelChange}>
-                <option value="">{translations[language].selectModel}</option>
-            </select>
-            <select id="yearSelector" ref={yearSelectorRef} disabled onChange={handleYearChange}>
-                <option value="">{translations[language].selectYear}</option>
-            </select>
+            <Select
+                id="brandSelector"
+                value={selectedBrand}
+                onChange={handleBrandChange}
+                options={brands}
+                isDisabled={brands.length === 0}
+                placeholder={translations[language].selectBrand}
+            />
+            <Select
+                id="modelSelector"
+                value={selectedModel}
+                onChange={handleModelChange}
+                options={models}
+                isDisabled={!selectedBrand}
+                placeholder={translations[language].selectModel}
+            />
+            <Select
+                id="yearSelector"
+                value={selectedYear}
+                onChange={handleYearChange}
+                options={years}
+                isDisabled={!selectedModel}
+                placeholder={translations[language].selectYear}
+            />
             </div>
 
             <div id="resultsArea" style={{ display: 'none' }}>

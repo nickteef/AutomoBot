@@ -60,127 +60,105 @@ export function searchByBrandModelYear(selectedBrand, selectedModel, selectedYea
 }
   
 export function populateBrandSelector() {
-    client.search({
-        index: 'opsi-data', 
-        size: 0, 
-        body: {
-        aggs: {
-            unique_brands: {
-            terms: {
-                field: 'znamka.keyword', 
-                size: 100, // Adjust the size according to your needs
-                order: {
-                _count: "desc"
-                }
-            }
-            }
-        }
-        }
-    }).then(function (response) {
-        const brands = response.aggregations.unique_brands.buckets
-                        .map(bucket => bucket.key)
-                        .sort();
-        fillBrandSelector(brands);
-    }, function (error) {
-        console.error('Error fetching brands:', error);
-    });
-}
-
-function fillBrandSelector(brands) {
-    const brandSelector = document.getElementById('brandSelector');
-    brands.forEach(brand => {
-      const option = document.createElement('option');
-      option.value = brand;
-      option.textContent = brand;
-      brandSelector.appendChild(option);
-    });
+  return new Promise((resolve, reject) => {
+      client.search({
+          index: 'opsi-data',
+          size: 0,
+          body: {
+              aggs: {
+                  unique_brands: {
+                      terms: {
+                          field: 'znamka.keyword',
+                          size: 100, // Adjust the size according to your needs
+                          order: {
+                              _count: "desc"
+                          }
+                      }
+                  }
+              }
+          }
+      }).then(response => {
+          const brands = response.aggregations.unique_brands.buckets
+                          .map(bucket => bucket.key)
+                          .sort();
+          resolve(brands);
+      }).catch(error => {
+          console.error('Error fetching brands:', error);
+          reject(error);
+      });
+  });
 }  
   
-export function populateModelSelector(selectedBrand) { 
-    client.search({
-      index: 'opsi-data', 
-      size: 0, 
-      body: {
-        query: {
-          // Filter to only include documents with the selected brand
-          bool: {
-            filter: [
-              { term: { "znamka.keyword": selectedBrand } }
-            ]
-          }
-        },
-        aggs: {
-          unique_models: {
-            terms: {
-              field: 'komercOznaka.keyword', 
-              size: 1000, // Adjust the size according to your needs
-              order: {
-                _count: "desc"
+export function populateModelSelector(selectedBrand) {
+  return new Promise((resolve, reject) => {
+      client.search({
+          index: 'opsi-data',
+          size: 0,
+          body: {
+              query: {
+                  bool: {
+                      filter: [
+                          { term: { "znamka.keyword": selectedBrand } }
+                      ]
+                  }
+              },
+              aggs: {
+                  unique_models: {
+                      terms: {
+                          field: 'komercOznaka.keyword',
+                          size: 1000, // Adjust the size according to your needs
+                          order: {
+                              _count: "desc"
+                          }
+                      }
+                  }
               }
-            }
           }
-        }
-      }
-    }).then(function (response) {
-      const models = response.aggregations.unique_models.buckets
-                      .map(bucket => bucket.key)
-                      .sort();
-      fillModelSelector(models);
-    }, function (error) {
-      console.error('Error fetching models:', error);
-    });
+      }).then(response => {
+          const models = response.aggregations.unique_models.buckets
+                          .map(bucket => bucket.key)
+                          .sort();
+          resolve(models);
+      }).catch(error => {
+          console.error('Error fetching models:', error);
+          reject(error);
+      });
+  });
 }
 
-function fillModelSelector(models) {
-    const modelSelector = document.getElementById('modelSelector');
-    models.forEach(models => {
-      const option = document.createElement('option');
-      option.value = models;
-      option.textContent = models;
-      modelSelector.appendChild(option);
-    });
-}
- 
 export function populateYearSelector(selectedBrand, selectedModel) {
-    client.search({
-      index: 'opsi-data',
-      size: 0,
-      body: {
-        query: {
-          bool: {
-            filter: [
-              { term: { "znamka.keyword": selectedBrand } },
-              { term: { "komercOznaka.keyword": selectedModel } }
-            ]
+  return new Promise((resolve, reject) => {
+      client.search({
+          index: 'opsi-data',
+          size: 0,
+          body: {
+              query: {
+                  bool: {
+                      filter: [
+                          { term: { "znamka.keyword": selectedBrand } },
+                          { term: { "komercOznaka.keyword": selectedModel } }
+                      ]
+                  }
+              },
+              aggs: {
+                  unique_years: {
+                      terms: {
+                          field: "letnik.keyword",  // Use the letnik field directly
+                          size: 124 // Adjust as needed
+                      }
+                  }
+              }
           }
-        },
-        aggs: {
-          unique_years: {
-            terms: {
-              field: "letnik.keyword",  // Use the letnik field directly
-              size: 124 // Adjust as needed
-            }
-          }
-        }
-      }
-    }).then(function (response) {
-      const years = response.aggregations.unique_years.buckets
-                      .map(bucket => bucket.key)
-                      .sort();
-      fillYearSelector(years);
-    }, function (error) {
-      console.error('Error fetching models:', error);
-    });
-}
-
-function fillYearSelector(years) {
-    const yearSelector = document.getElementById('yearSelector');
-    years.forEach(years => {
-      const option = document.createElement('option');
-      option.value = years;
-      option.textContent = years;
-      yearSelector.appendChild(option);
-    });
+      }).then(response => {
+          const years = response.aggregations.unique_years.buckets
+                          .map(bucket => bucket.key)
+                          .sort();
+          resolve(years);
+      }).catch(error => {
+          console.error('Error fetching years:', error);
+          reject(error);
+      });
+  });
 }
 
 // Function to save the data back to opsi-data index

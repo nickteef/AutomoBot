@@ -33,11 +33,11 @@ export async function fillForm(data) {
 
   if (modelSelect) {
     autofillSelectBox(modelSelect, data.komercOznaka);
-    await delay(2000);  // wait for 5 seconds
+    await delay(2000);  // wait for 2 seconds
   }
   if (commTagInput) {
     commTagInput.value = data.model || '';
-    await delay(2000);  // wait for 5 seconds
+    await delay(2000);  // wait for 2 seconds
   }
 
   if (vinInput) vinInput.value = data.VIN || '';

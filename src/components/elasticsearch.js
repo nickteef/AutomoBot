@@ -9,7 +9,7 @@ const client = new elasticsearch.Client({
 export function searchVIN(vin) {
     return new Promise((resolve, reject) => {
         client.search({
-        index: 'opsi-data',
+        index: 'register',
         body: {
             query: {
             match: {
@@ -34,7 +34,7 @@ export function searchVIN(vin) {
 export function searchByBrandModelYear(selectedBrand, selectedModel, selectedYear) {
     return new Promise((resolve, reject) => { 
         client.search({
-            index: 'opsi-data',
+            index: 'register',
             body: {
             query: {
                 bool: {
@@ -62,7 +62,7 @@ export function searchByBrandModelYear(selectedBrand, selectedModel, selectedYea
 export function populateBrandSelector() {
   return new Promise((resolve, reject) => {
       client.search({
-          index: 'opsi-data',
+          index: 'register',
           size: 0,
           body: {
               aggs: {
@@ -92,7 +92,7 @@ export function populateBrandSelector() {
 export function populateModelSelector(selectedBrand) {
   return new Promise((resolve, reject) => {
       client.search({
-          index: 'opsi-data',
+          index: 'register',
           size: 0,
           body: {
               query: {
@@ -129,7 +129,7 @@ export function populateModelSelector(selectedBrand) {
 export function populateYearSelector(selectedBrand, selectedModel) {
   return new Promise((resolve, reject) => {
       client.search({
-          index: 'opsi-data',
+          index: 'register',
           size: 0,
           body: {
               query: {
@@ -161,7 +161,7 @@ export function populateYearSelector(selectedBrand, selectedModel) {
   });
 }
 
-// Function to save the data back to opsi-data index
+// Function to save the data back to register index
 
 // Function to save feedback data
 

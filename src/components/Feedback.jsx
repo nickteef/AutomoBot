@@ -49,9 +49,6 @@ const Feedback = ({ onSubmit }) => {
                 />
             </div>
             <button className="submit-button" onClick={handleSubmit}>Submit</button>
-            <div className="logo">
-                <img src="path/to/automobot-logo.png" alt="AutomoBot Logo" />
-            </div>
         </div>
     );
 };

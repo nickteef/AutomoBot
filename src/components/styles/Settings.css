@@ -1,7 +1,10 @@
 .settings {
     padding: 20px;
+    font-size: 16px;
 }
 
-.settings button {
+.back-button {
+    height: 50px;
     margin-bottom: 20px;
+    cursor: pointer;
 }

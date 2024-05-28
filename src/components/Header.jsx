@@ -2,7 +2,7 @@ import React, { useContext } from 'react';
 import LanguageContext from './LanguageContext.jsx';
 import './styles/Header.css';
 
-const Header = ({ onSettingsClick }) => {
+function Header({ onSettingsClick }) {
     const { language, toggleLanguage } = useContext(LanguageContext);
 
     return (

@@ -10,16 +10,18 @@ function Main() {
     const { language } = useContext(LanguageContext);
 
     // State for storing variable values
-    let vehicleDataGlobal = {};
     const [vin, setVin] = useState('');
+    const [vehicleDataGlobal, setVehicleDataGlobal] = useState({});
     const [selectedBrand, setSelectedBrand] = useState(null);
     const [selectedModel, setSelectedModel] = useState(null);
     const [selectedYear, setSelectedYear] = useState(null);
     const [brands, setBrands] = useState([]);
     const [models, setModels] = useState([]);
     const [years, setYears] = useState([]);
+    const [resultsDisplayed, setResultsDisplayed] = useState(false);
     const [loading, setLoading] = useState(false);
     const [showFeedback, setShowFeedback] = useState(false);
+    const feedbackRef = useRef(null);
 
     useEffect(() => {
         es.populateBrandSelector().then(brands => {
@@ -42,8 +44,14 @@ function Main() {
         });
     }, []);
 
+    useEffect(() => {
+        if (showFeedback && feedbackRef.current) {
+            feedbackRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+    }, [showFeedback]);
+
     const handleVinChange = (event) => {
-        setVin(event.target.value);
+        setVin(event.target.value.toUpperCase());
     };
 
     const handleVinSearch = () => {
@@ -58,7 +66,8 @@ function Main() {
 
     const handleSearchByClick = () => {
         document.getElementById('brandModelYearSelectors').style.display = 'block';
-    };
+        document.getElementById('searchByBrandModelYear').style.display = 'none';
+    };    
 
     const handleBrandChange = (selectedOption) => {
         setSelectedBrand(selectedOption);
@@ -94,7 +103,7 @@ function Main() {
         chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
             const codeToInject = `document.dispatchEvent(new CustomEvent('AutomoBotAutofill', { detail: ${JSON.stringify(vehicleDataGlobal)} })); `;
             chrome.tabs.executeScript(tabs[0].id, { code: codeToInject }, () => {
-                setTimeout(() => setLoading(false), 5000); // Hide loading screen after 5 seconds
+                setTimeout(() => setLoading(false), 4000); // Hide loading screen after 4 seconds
                 setShowFeedback(true);
             });
         });
@@ -110,7 +119,7 @@ function Main() {
     };
 
     const displayResults = (data) => {
-        vehicleDataGlobal = data;
+        setVehicleDataGlobal(data);
         const resultsArea = document.getElementById('resultsArea');
         const errorArea = document.getElementById('errorArea');
         resultsArea.style.display = 'block';
@@ -120,11 +129,13 @@ function Main() {
         resultsArea.innerHTML = `<h2>${translations[language].vehicleInformation}</h2>`;
 
         // Display all vehicle data
-        Object.keys(vehicleDataGlobal).forEach(key => {
+        Object.keys(data).forEach(key => {
             const p = document.createElement('p');
-            p.textContent = `${key}: ${vehicleDataGlobal[key]}`;
+            p.textContent = `${key}: ${data[key]}`;
             resultsArea.appendChild(p);
         });
+
+        setResultsDisplayed(true);
     };
 
     const displayError = (message) => {
@@ -140,7 +151,7 @@ function Main() {
             <img src="./images/icon.png" alt="AutomoBot Logo" id="logo-icon" />
             <div id="inputArea">
                 <input type="text" id="vinInput" placeholder={translations[language].enterVIN} value={vin} onChange={handleVinChange} />
-                <button id="searchButton" onClick={handleVinSearch}>
+                <button id="searchButton" disabled={!vin} onClick={handleVinSearch}>
                     {translations[language].decodeVIN}
                 </button>
             </div>
@@ -178,16 +189,16 @@ function Main() {
             </div>
             <div id="errorArea" style={{ display: 'none', color: 'red' }}>
             </div>
-            <button id="useAutofill" onClick={handleAutofill}>
+            <button id="useAutofill" disabled={!resultsDisplayed} onClick={handleAutofill}>
                 {translations[language].autofillThePage}
             </button>
             {loading && (
                 <div className="loading-screen">
                     <div className="loading-animation"></div>
-                    <div className="loading-text">Loading...</div>
+                    <div className="loading-text">Autofilling...</div>
                 </div>
             )}
-            {showFeedback && <Feedback onSubmit={handleSubmitFeedback} />}
+            {showFeedback && <Feedback onSubmit={handleSubmitFeedback} ref={feedbackRef}/>}
         </div>
     );
 }

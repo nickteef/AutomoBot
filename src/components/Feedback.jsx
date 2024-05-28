@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, forwardRef } from 'react';
 import './styles/Feedback.css';
 
-const Feedback = ({ onSubmit }) => {
+function Feedback({ onSubmit }, ref) {
     const [selectedRating, setSelectedRating] = useState(null);
     const [additionalFeedback, setAdditionalFeedback] = useState('');
+    const [suggestedFeedback, setSuggestedFeedback] = useState([]);
 
     const ratings = [
         { value: 1, label: 'Terrible', emoji: '😠' },
@@ -13,9 +14,31 @@ const Feedback = ({ onSubmit }) => {
         { value: 5, label: 'Great', emoji: '😁' },
     ];
 
+    const suggestions = [
+        "Missing data",
+        "Incorrect data",
+        "Troubles with autofill",
+        "Very helpful",
+        "Simple to use"
+    ];
+
     const handleRatingClick = (value) => {
         setSelectedRating(value);
     };
+
+    const handleSuggestionClick = (text) => {
+        setSuggestedFeedback((prev) => {
+            if (prev.includes(text)) {
+                return prev.filter((item) => item !== text);
+            } else {
+                return [...prev, text];
+            }
+        });
+    };
+
+    useEffect(() => {
+        setAdditionalFeedback(suggestedFeedback.join(", "));
+    }, [suggestedFeedback]);
 
     const handleSubmit = () => {
         if (selectedRating !== null) {
@@ -24,7 +47,7 @@ const Feedback = ({ onSubmit }) => {
     };
 
     return (
-        <div className="feedback-container">
+        <div className="feedback-container" ref={ref}>
             <h2>How helpful was I? Let me know!</h2>
             <div className="ratings">
                 {ratings.map((rating) => (
@@ -39,18 +62,29 @@ const Feedback = ({ onSubmit }) => {
                 ))}
             </div>
             <div className="additional-feedback">
-                <label htmlFor="feedback">What are the main reasons for your rating?</label>
+                <label htmlFor="feedback-text">What are the main reasons for your rating?</label>
                 <input
                     type="text"
-                    id="feedback"
+                    id="feedback-text"
                     placeholder="Optional"
                     value={additionalFeedback}
                     onChange={(e) => setAdditionalFeedback(e.target.value)}
                 />
             </div>
-            <button className="submit-button" onClick={handleSubmit}>Submit</button>
+            <div className="suggestions">
+                {suggestions.map((suggestion) => (
+                    <button
+                        key={suggestion}
+                        className={`suggestion-button ${suggestedFeedback.includes(suggestion) ? 'selected' : ''}`}
+                        onClick={() => handleSuggestionClick(suggestion)}
+                    >
+                        {suggestion}
+                    </button>
+                ))}
+            </div>
+            <button className="submit-button" disabled={!selectedRating} onClick={handleSubmit}>Submit</button>
         </div>
     );
-};
+}
 
-export default Feedback;
+export default forwardRef(Feedback);

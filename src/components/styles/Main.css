@@ -4,107 +4,114 @@ body {
     font-family: "Rubik", sans-serif;
     color: #333;
     background-color: #f9f9f9;
-    width: 100%;
-    height: 100%; /* Ensure it takes full height if needed */
     margin: 0;
     padding: 0;
+    width: 100%;
+    height: 100%;
     box-sizing: border-box;
     text-align: center;
-  }
+    overflow-y: auto;
+}
 
-  #logo-icon {
-    height: 160px; /* Adjusted height */
+#logo-icon {
+    height: 160px;
     padding: 10px;
-    filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.1)); /* Drop shadow */
-  }
-  
-  #inputArea {
+    filter: drop-shadow(0px 4px 10px rgba(0, 0, 0, 0.1));
+}
+
+#inputArea {
     text-align: center;
     margin-bottom: 20px;
-  }
-  
-  #vinInput {
+}
+
+#vinInput {
+    font-family: "Rubik", sans-serif;
     font-size: 16px;
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 8px 15px;
     width: 80%;
     margin-bottom: 10px;
-  }
-  
-  #searchButton {
-    font-weight: bold;
+}
+
+button {
+    font-family: "Rubik", sans-serif;
     font-size: 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+button:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+    pointer-events: none !important;
+}
+
+button#searchButton {
+    font-weight: bold;
     background-color: #038ECA;
     color: white;
     border: none;
-    border-radius: 5px;
     padding: 10px 20px;
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  #searchButton:hover {
-    background-color: #357ABD;
-  }
+}
 
-  /* Styles for the clickable text button */
+button#searchButton:hover {
+    background-color: #357ABD;
+}
+
 #searchByBrandModelYear {
-  font-size: 15px;
-  background: none;
-  border: none;
-  color: blue;
-  text-decoration: underline;
-  cursor: pointer;
-  padding: 5px;
-  transition: background-color 0.3s;
+    font-family: "Rubik", sans-serif;
+    font-size: 15px;
+    background: none;
+    border: none;
+    color: blue;
+    text-decoration: underline;
+    cursor: pointer;
+    padding: 5px;
+    transition: color 0.3s;
 }
 
 #searchByBrandModelYear:hover {
-  color: rgb(8, 67, 125)
+    color: rgb(8, 67, 125);
 }
 
-/* General styles for the dropdowns */
 select {
-  display: block;
-  width: 100%;
-  padding: 0.5em;
-  margin: 0.5em 0;
-  box-sizing: border-box;
-  border: 1px solid #ccc;
-  border-radius: 4px;
+    display: block;
+    width: 90%;
+    padding: 0.5em;
+    margin: 0.5em 0 1em 0;
+    box-sizing: border-box;
+    border: 1px solid #ccc;
+    border-radius: 4px;
 }
 
-/* Disabled state for dropdowns */
 select:disabled {
-  background-color: #e9ecef;
-  opacity: 0.5;
+    background-color: #e9ecef;
+    opacity: 0.5;
 }
 
-/* Style for the container holding the dropdowns */
 #brandModelYearSelectors {
-  font-size: 16px;
-  padding: 10px;
-  border: 1px solid #ddd;
-  border-radius: 5px;
-  background-color: #f9f9f9;
+    font-size: 16px;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
 }
 
-  
-  #resultsArea, #errorArea {
+#resultsArea, #errorArea {
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 15px;
     background-color: white;
-  }
-  
-  #errorArea {
+}
+
+#errorArea {
     border-color: #e74c3c;
     color: #e74c3c;
-  }
-  
-  button#useAutofill {
-    font-size: 16px;
+}
+
+button#useAutofill {
     font-weight: bold;
     display: block;
     width: 90%;
@@ -112,23 +119,17 @@ select:disabled {
     background-color: #10315D;
     color: white;
     border: none;
-    border-radius: 5px;
-    margin: 10px auto; /* Center horizontally with auto left and right margins */
-    cursor: pointer;
-    transition: background-color 0.3s;
-  }
-  
-  
-  button#useAutofill:hover {
-    background-color: #0c2445;
-  }
-
-/* Blur effect for the background */
-.container.blurred > *:not(.loading-screen) {
-  filter: blur(5px);
+    margin: 10px auto;
 }
 
-/* Loading screen styles */
+button#useAutofill:hover {
+    background-color: #0056b3;
+}
+
+.container.blurred > *:not(.loading-screen) {
+    filter: blur(5px);
+}
+
 .loading-screen {
     position: fixed;
     top: 0;

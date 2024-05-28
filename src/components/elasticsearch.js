@@ -9,7 +9,7 @@ const client = new elasticsearch.Client({
 export function searchVIN(vin) {
     return new Promise((resolve, reject) => {
         client.search({
-        index: 'register',
+        index: 'opsi-data',
         body: {
             query: {
             match: {
@@ -34,7 +34,7 @@ export function searchVIN(vin) {
 export function searchByBrandModelYear(selectedBrand, selectedModel, selectedYear) {
     return new Promise((resolve, reject) => { 
         client.search({
-            index: 'register',
+            index: 'opsi-data',
             body: {
             query: {
                 bool: {
@@ -62,14 +62,14 @@ export function searchByBrandModelYear(selectedBrand, selectedModel, selectedYea
 export function populateBrandSelector() {
   return new Promise((resolve, reject) => {
       client.search({
-          index: 'register',
+          index: 'opsi-data',
           size: 0,
           body: {
               aggs: {
                   unique_brands: {
                       terms: {
                           field: 'znamka.keyword',
-                          size: 100, // Adjust the size according to your needs
+                          size: 200, // Adjust the size according to your needs
                           order: {
                               _count: "desc"
                           }
@@ -92,7 +92,7 @@ export function populateBrandSelector() {
 export function populateModelSelector(selectedBrand) {
   return new Promise((resolve, reject) => {
       client.search({
-          index: 'register',
+          index: 'opsi-data',
           size: 0,
           body: {
               query: {
@@ -129,7 +129,7 @@ export function populateModelSelector(selectedBrand) {
 export function populateYearSelector(selectedBrand, selectedModel) {
   return new Promise((resolve, reject) => {
       client.search({
-          index: 'register',
+          index: 'opsi-data',
           size: 0,
           body: {
               query: {
@@ -161,10 +161,21 @@ export function populateYearSelector(selectedBrand, selectedModel) {
   });
 }
 
-// Function to save the data back to register index
+// Function to save the data back to opsi-data index
 
 // Function to save feedback data
-
+export const storeFeedback = async (feedbackData) => {
+    try {
+        const response = await client.index({
+            index: 'feedback',
+            document: feedbackData,
+        });
+        return response;
+    } catch (error) {
+        console.error('Error storing feedback:', error);
+        throw error;
+    }
+};
 
 
 

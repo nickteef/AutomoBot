@@ -110,5 +110,37 @@ document.addEventListener('AutomoBotAutofill', function(e) {
   fillForm(data);
 });
 
+// Function to add event listener to the target button
+function addButtonClickListener() {
+  const targetButton = document.querySelector('.FormButton.save');
+  if (targetButton) {
+      targetButton.addEventListener('click', () => {
+          chrome.runtime.sendMessage({message: 'targetButtonClick'});
+      });
+  }
+}
+
+// Check if the DOM is fully loaded
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', addButtonClickListener);
+} else {
+  addButtonClickListener();
+}
+
+// Create a MutationObserver to watch for changes in the DOM
+const observer = new MutationObserver((mutations) => {
+  mutations.forEach((mutation) => {
+      if (mutation.type === 'childList' || mutation.type === 'subtree') {
+          addButtonClickListener();
+      }
+  });
+});
+
+// Start observing the document for changes
+observer.observe(document.body, {
+  childList: true,
+  subtree: true
+});
+
 
 

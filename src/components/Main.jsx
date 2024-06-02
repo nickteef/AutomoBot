@@ -12,6 +12,7 @@ function Main() {
     // State for storing variable values
     const [vin, setVin] = useState('');
     const [vehicleDataGlobal, setVehicleDataGlobal] = useState({});
+    const [showSelectors, setShowSelectors] = useState(false);
     const [selectedBrand, setSelectedBrand] = useState(null);
     const [selectedModel, setSelectedModel] = useState(null);
     const [selectedYear, setSelectedYear] = useState(null);
@@ -22,6 +23,45 @@ function Main() {
     const [loading, setLoading] = useState(false);
     const [showFeedback, setShowFeedback] = useState(false);
     const feedbackRef = useRef(null);
+    const [feedbackData, setFeedbackData] = useState(null);
+    const [timeData, setTimeData] = useState(null);
+    const [lastSavedAnalyticsData, setLastSavedAnalyticsData] = useState(null);
+
+
+    // Load the saved state when the component mounts
+    useEffect(() => {
+        chrome.storage.local.get(['vin', 'selectedBrand', 'selectedModel', 'selectedYear', 'resultsDisplayed', 'vehicleDataGlobal', 'timeData', 'showFeedback'], (result) => {
+            if (result.vin) setVin(result.vin);
+            if (result.selectedBrand) setSelectedBrand(result.selectedBrand);
+            if (result.selectedModel) setSelectedModel(result.selectedModel);
+            if (result.selectedYear) setSelectedYear(result.selectedYear);
+            if (result.resultsDisplayed) setResultsDisplayed(result.resultsDisplayed);
+            if (result.vehicleDataGlobal) setVehicleDataGlobal(result.vehicleDataGlobal);
+            if (result.showFeedback) setShowFeedback(result.showFeedback);
+            if (result.feedbackData) setFeedbackData(result.feedbackData);
+            if (result.timeData) setTimeData(result.timeData);
+            // Call displayResults with restored vehicleDataGlobal if results were displayed
+            if (result.resultsDisplayed && result.vehicleDataGlobal) {
+                displayResults(result.vehicleDataGlobal);
+            }
+        });
+    }, []);
+    
+    // Save state data to Chrome storage whenever state changes
+    useEffect(() => {
+        chrome.storage.local.set({
+            vin,
+            selectedBrand,
+            selectedModel,
+            selectedYear,
+            resultsDisplayed,
+            vehicleDataGlobal,
+            timeData,
+            showFeedback,
+            feedbackData
+        });
+    }, [vin, selectedBrand, selectedModel, selectedYear, resultsDisplayed, vehicleDataGlobal, timeData, showFeedback, feedbackData]);
+
 
     useEffect(() => {
         es.populateBrandSelector().then(brands => {
@@ -31,18 +71,22 @@ function Main() {
     }, []);
 
     useEffect(() => {
-        es.populateModelSelector().then(models => {
-            const options = models.map(model => ({ value: model, label: model }));
-            setModels(options);
-        });
-    }, []);
+        if (selectedBrand) {
+            es.populateModelSelector(selectedBrand.value).then(models => {
+                const options = models.map(model => ({ value: model, label: model }));
+                setModels(options);
+            });
+        }
+    }, [selectedBrand]);
 
     useEffect(() => {
-        es.populateYearSelector().then(years => {
-            const options = years.map(year => ({ value: year, label: year }));
-            setYears(options);
-        });
-    }, []);
+        if (selectedModel) {
+            es.populateYearSelector(selectedBrand.value, selectedModel.value).then(years => {
+                const options = years.map(year => ({ value: year, label: year }));
+                setYears(options);
+            });
+        }
+    }, [selectedModel]);
 
     useEffect(() => {
         if (showFeedback && feedbackRef.current) {
@@ -50,8 +94,68 @@ function Main() {
         }
     }, [showFeedback]);
 
+    const storeAnalyticsData = (timeData, feedbackData) => {
+        const analyticsData = {
+            ...timeData,
+            ...feedbackData,
+        };
+    
+        es.storeAnalyticsData(analyticsData);
+        resetState(true);
+    };
+
+    // A debounce function to handle rapid consecutive calls
+    const debounce = (func, delay) => {
+        let timeoutId;
+        return (...args) => {
+            clearTimeout(timeoutId);
+            timeoutId = setTimeout(() => {
+                func(...args);
+            }, delay);
+        };
+    };    
+
+    useEffect(() => {
+        const handleStorageChange = debounce((changes, areaName) => {
+            if (areaName === 'local' && changes.timeKeeperData) {
+                const newTimeData = changes.timeKeeperData.newValue;
+                setTimeData(newTimeData);
+    
+                if (feedbackData && newTimeData) {
+                    const newAnalyticsData = { ...newTimeData, ...feedbackData };
+                    
+                    // Compare only rating and feedback
+                    if (feedbackData.rating !== lastSavedAnalyticsData?.rating ||
+                        feedbackData.feedback !== lastSavedAnalyticsData?.feedback) {
+                        
+                        storeAnalyticsData(newAnalyticsData)
+                            .then(() => {
+                                setLastSavedAnalyticsData(newAnalyticsData); // Update the last saved data only after a successful save
+                            })
+                            .catch(error => {
+                                console.error('Error saving analytics data:', error);
+                            });
+                    }
+                }
+            }
+        }, 100); // Adjust the delay as needed
+    
+        // Add the listener for storage changes
+        chrome.storage.onChanged.addListener(handleStorageChange);
+    
+        // Cleanup the listener on component unmount
+        return () => {
+            chrome.storage.onChanged.removeListener(handleStorageChange);
+        };
+    }, [feedbackData, lastSavedAnalyticsData]);
+    
+
     const handleVinChange = (event) => {
         setVin(event.target.value.toUpperCase());
+    };
+
+    const validateVIN = (vin) => {
+        return vin.length <= 17;
     };
 
     const handleVinSearch = () => {
@@ -65,8 +169,7 @@ function Main() {
     };
 
     const handleSearchByClick = () => {
-        document.getElementById('brandModelYearSelectors').style.display = 'block';
-        document.getElementById('searchByBrandModelYear').style.display = 'none';
+        setShowSelectors(true);
     };    
 
     const handleBrandChange = (selectedOption) => {
@@ -98,31 +201,10 @@ function Main() {
             .catch(displayError);
     };
 
-    const handleAutofill = () => {
-        setLoading(true);
-        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-            const codeToInject = `document.dispatchEvent(new CustomEvent('AutomoBotAutofill', { detail: ${JSON.stringify(vehicleDataGlobal)} })); `;
-            chrome.tabs.executeScript(tabs[0].id, { code: codeToInject }, () => {
-                setTimeout(() => setLoading(false), 4000); // Hide loading screen after 4 seconds
-                setShowFeedback(true);
-            });
-        });
-    };
-
-    const handleSubmitFeedback = (feedback) => {
-        console.log('Feedback submitted:', feedback);
-        setShowFeedback(false);
-    };
-
-    const validateVIN = (vin) => {
-        return vin.length <= 17;
-    };
-
     const displayResults = (data) => {
         setVehicleDataGlobal(data);
         const resultsArea = document.getElementById('resultsArea');
         const errorArea = document.getElementById('errorArea');
-        resultsArea.style.display = 'block';
         errorArea.style.display = 'none';
 
         // Clear previous results
@@ -140,25 +222,60 @@ function Main() {
 
     const displayError = (message) => {
         const errorArea = document.getElementById('errorArea');
-        const resultsArea = document.getElementById('resultsArea');
         errorArea.textContent = message;
-        resultsArea.style.display = 'none';
+        setResultsDisplayed(false);
         errorArea.style.display = 'block';
     };
+
+    const handleAutofill = () => {
+        setLoading(true);
+        chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
+            const codeToInject = `document.dispatchEvent(new CustomEvent('AutomoBotAutofill', { detail: ${JSON.stringify(vehicleDataGlobal)} })); `;
+            chrome.tabs.executeScript(tabs[0].id, { code: codeToInject }, () => {
+                setTimeout(() => setLoading(false), 4000); // Hide loading screen after 4 seconds
+                setShowFeedback(true);
+            });
+        });
+    };
+
+    const handleSubmitFeedback = (feedback) => {
+        setFeedbackData(feedback);
+        if (timeData) storeAnalyticsData(timeData, feedback);  
+        resetState(false);
+    };
+
+    const resetState = (oldFeedback) => {
+        setVin('');
+        setVehicleDataGlobal({});
+        setSelectedBrand(null);
+        setSelectedModel(null);
+        setSelectedYear(null);
+        setBrands([]);
+        setModels([]);
+        setYears([]);
+        setResultsDisplayed(false);
+        setLoading(false);
+        setShowFeedback(false);
+        setTimeData(null);
+        // We do not reset feedbackData, because it might be needed later, maybe we need to reset it under a condition
+        if (oldFeedback) setFeedbackData(null);
+        // Also have to reset timeKeeperData
+        chrome.storage.local.set({ timeKeeperData: null }, () => {});
+    };    
 
     return (
         <div className={`container ${loading ? 'blurred' : ''}`}>
             <img src="./images/icon.png" alt="AutomoBot Logo" id="logo-icon" />
             <div id="inputArea">
-                <input type="text" id="vinInput" placeholder={translations[language].enterVIN} value={vin} onChange={handleVinChange} />
+                <input type="text" id="vinInput" placeholder={translations[language].enterVIN} value={vin} onChange={handleVinChange} onKeyDown={(e) => {if (e.key === 'Enter') {handleVinSearch();}}}/>
                 <button id="searchButton" disabled={!vin} onClick={handleVinSearch}>
                     {translations[language].decodeVIN}
                 </button>
             </div>
-            <button id="searchByBrandModelYear" className="text-button" onClick={handleSearchByClick}>
+            <button id="searchByBrandModelYear" className="text-button" onClick={handleSearchByClick} hidden={showSelectors}>
                 {translations[language].searchByBMY}
             </button>
-            <div id="brandModelYearSelectors" style={{ display: 'none' }}>
+            <div id="brandModelYearSelectors" hidden={!showSelectors}>
                 <Select
                     id="brandSelector"
                     value={selectedBrand}
@@ -184,7 +301,7 @@ function Main() {
                     placeholder={translations[language].selectYear}
                 />
             </div>
-            <div id="resultsArea" style={{ display: 'none' }}>
+            <div id="resultsArea" hidden={!resultsDisplayed}>
                 <h2>{translations[language].vehicleInformation}</h2>
             </div>
             <div id="errorArea" style={{ display: 'none', color: 'red' }}>

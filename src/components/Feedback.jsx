@@ -42,8 +42,7 @@ function Feedback({ onSubmit }, ref) {
 
   const handleSubmit = () => {
     if (selectedRating !== null) {
-      const endTime = new Date();
-      onSubmit({ rating: selectedRating, feedback: additionalFeedback, timestamp: endTime.toLocaleString() });
+      onSubmit({ rating: selectedRating, feedback: additionalFeedback});
     }
   };
 

@@ -5,6 +5,11 @@ const client = new elasticsearch.Client({
     host: 'http://localhost:9200',
 });
 
+// Initialize Bonsai Elasticsearch client
+const bonsaiClient = new elasticsearch.Client({
+    host: 'https://xoo119r5pt:fldo9x6klp@search-8813477231.eu-central-1.bonsaisearch.net:443',
+});
+
 // Function to search for VIN
 export function searchVIN(vin) {
     return new Promise((resolve, reject) => {
@@ -12,9 +17,9 @@ export function searchVIN(vin) {
         index: 'opsi-data',
         body: {
             query: {
-            match: {
-                VIN: vin
-            }
+                match: {
+                    VIN: vin
+                }
             }
         }
         }).then(function (response) {
@@ -161,21 +166,20 @@ export function populateYearSelector(selectedBrand, selectedModel) {
   });
 }
 
-// Function to save the data back to opsi-data index
-
-// Function to save feedback data
-export const storeFeedback = async (feedbackData) => {
+export const storeAnalyticsData = async (analyticsData) => {
     try {
-        const response = await client.index({
-            index: 'feedback',
-            document: feedbackData,
+        console.log(analyticsData); // For debugging purposes
+        const response = await bonsaiClient.index({
+            index: 'analytics-data',
+            body: analyticsData,
         });
+        console.log('Elasticsearch response:', response);
         return response;
     } catch (error) {
-        console.error('Error storing feedback:', error);
+        console.error('Error storing analytics data:', error);
         throw error;
     }
-};
+  };
 
-
+// Function to save the data back to opsi-data index
 

@@ -100,6 +100,7 @@ select:disabled {
 }
 
 #resultsArea, #errorArea {
+    font-size: 15px;
     border: 1px solid #ddd;
     border-radius: 5px;
     padding: 15px;

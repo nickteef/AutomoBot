@@ -27,7 +27,6 @@ function Main() {
     const [timeData, setTimeData] = useState(null);
     const [lastSavedAnalyticsData, setLastSavedAnalyticsData] = useState(null);
 
-
     // Load the saved state when the component mounts
     useEffect(() => {
         chrome.storage.local.get(['vin', 'selectedBrand', 'selectedModel', 'selectedYear', 'resultsDisplayed', 'vehicleDataGlobal', 'timeData', 'showFeedback'], (result) => {
@@ -62,7 +61,6 @@ function Main() {
         });
     }, [vin, selectedBrand, selectedModel, selectedYear, resultsDisplayed, vehicleDataGlobal, timeData, showFeedback, feedbackData]);
 
-
     useEffect(() => {
         es.populateBrandSelector().then(brands => {
             const options = brands.map(brand => ({ value: brand, label: brand }));
@@ -94,12 +92,9 @@ function Main() {
         }
     }, [showFeedback]);
 
-    const storeAnalyticsData = (timeData, feedbackData) => {
-        const analyticsData = {
-            ...timeData,
-            ...feedbackData,
-        };
-    
+    const storeTimeFeedData = (timeData, feedbackData) => {
+        const analyticsData = { ...timeData, ...feedbackData };
+        setLastSavedAnalyticsData(analyticsData);
         es.storeAnalyticsData(analyticsData);
         resetState(true);
     };
@@ -120,29 +115,21 @@ function Main() {
             if (areaName === 'local' && changes.timeKeeperData) {
                 const newTimeData = changes.timeKeeperData.newValue;
                 setTimeData(newTimeData);
-    
+
                 if (feedbackData && newTimeData) {
-                    const newAnalyticsData = { ...newTimeData, ...feedbackData };
-                    
                     // Compare only rating and feedback
                     if (feedbackData.rating !== lastSavedAnalyticsData?.rating ||
                         feedbackData.feedback !== lastSavedAnalyticsData?.feedback) {
-                        
-                        storeAnalyticsData(newAnalyticsData)
-                            .then(() => {
-                                setLastSavedAnalyticsData(newAnalyticsData); // Update the last saved data only after a successful save
-                            })
-                            .catch(error => {
-                                console.error('Error saving analytics data:', error);
-                            });
+
+                        storeTimeFeedData(newTimeData, feedbackData);
                     }
                 }
             }
         }, 100); // Adjust the delay as needed
-    
+
         // Add the listener for storage changes
         chrome.storage.onChanged.addListener(handleStorageChange);
-    
+
         // Cleanup the listener on component unmount
         return () => {
             chrome.storage.onChanged.removeListener(handleStorageChange);
@@ -210,12 +197,23 @@ function Main() {
         // Clear previous results
         resultsArea.innerHTML = `<h2>${translations[language].vehicleInformation}</h2>`;
 
-        // Display all vehicle data
+        // Display all vehicle data with field name above the value
         Object.keys(data).forEach(key => {
-            const p = document.createElement('p');
-            p.textContent = `${key}: ${data[key]}`;
-            resultsArea.appendChild(p);
+            if (key != "DR_score" && data[key]) { 
+                const container = document.createElement('div');
+
+                const keyElement = document.createElement('strong');
+                keyElement.textContent = translations[language][key];
+
+                const valueElement = document.createElement('p');
+                valueElement.textContent = data[key];
+
+                container.appendChild(keyElement);
+                container.appendChild(valueElement);
+                resultsArea.appendChild(container);
+            }
         });
+
 
         setResultsDisplayed(true);
     };
@@ -240,7 +238,8 @@ function Main() {
 
     const handleSubmitFeedback = (feedback) => {
         setFeedbackData(feedback);
-        if (timeData) storeAnalyticsData(timeData, feedback);  
+        es.storeFeedbackData(feedback);
+        if (timeData) storeTimeFeedData(timeData, feedback);  
         resetState(false);
     };
 
@@ -261,7 +260,7 @@ function Main() {
         if (oldFeedback) setFeedbackData(null);
         // Also have to reset timeKeeperData
         chrome.storage.local.set({ timeKeeperData: null }, () => {});
-    };    
+    };
 
     return (
         <div className={`container ${loading ? 'blurred' : ''}`}>

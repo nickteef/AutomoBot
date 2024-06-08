@@ -44,9 +44,9 @@ export function searchByBrandModelYear(selectedBrand, selectedModel, selectedYea
             query: {
                 bool: {
                 must: [
-                    { match: { "znamka.keyword": selectedBrand } },
-                    { match: { "komercOznaka.keyword": selectedModel } },
-                    { match: { "letnik.keyword": selectedYear } }  // Use match instead of wildcard
+                    { match: { "brand.keyword": selectedBrand } },
+                    { match: { "commercialTag.keyword": selectedModel } },
+                    { match: { "manufactureYear.keyword": selectedYear } }  // Use match instead of wildcard
                 ]
                 }
             }
@@ -73,8 +73,8 @@ export function populateBrandSelector() {
               aggs: {
                   unique_brands: {
                       terms: {
-                          field: 'znamka.keyword',
-                          size: 200, // Adjust the size according to your needs
+                          field: 'brand.keyword',
+                          size: 150, // Adjust the size according to your needs
                           order: {
                               _count: "desc"
                           }
@@ -103,14 +103,14 @@ export function populateModelSelector(selectedBrand) {
               query: {
                   bool: {
                       filter: [
-                          { term: { "znamka.keyword": selectedBrand } }
+                          { term: { "brand.keyword": selectedBrand } }
                       ]
                   }
               },
               aggs: {
                   unique_models: {
                       terms: {
-                          field: 'komercOznaka.keyword',
+                          field: 'commercialTag.keyword',
                           size: 1000, // Adjust the size according to your needs
                           order: {
                               _count: "desc"
@@ -140,15 +140,15 @@ export function populateYearSelector(selectedBrand, selectedModel) {
               query: {
                   bool: {
                       filter: [
-                          { term: { "znamka.keyword": selectedBrand } },
-                          { term: { "komercOznaka.keyword": selectedModel } }
+                          { term: { "brand.keyword": selectedBrand } },
+                          { term: { "commercialTag.keyword": selectedModel } }
                       ]
                   }
               },
               aggs: {
                   unique_years: {
                       terms: {
-                          field: "letnik.keyword",  // Use the letnik field directly
+                          field: "manufactureYear.keyword",  // Use the manufactureYear field directly
                           size: 124 // Adjust as needed
                       }
                   }
@@ -166,20 +166,96 @@ export function populateYearSelector(selectedBrand, selectedModel) {
   });
 }
 
-export const storeAnalyticsData = async (analyticsData) => {
-    try {
-        console.log(analyticsData); // For debugging purposes
-        const response = await bonsaiClient.index({
+export function storeAnalyticsData(analyticsData) {
+    console.log(analyticsData); // For debugging purposes
+
+    return new Promise((resolve, reject) => {
+        bonsaiClient.index({
             index: 'analytics-data',
             body: analyticsData,
+        })
+        .then(response => {
+            console.log('Elasticsearch response:', response);
+            resolve(response);
+        })
+        .catch(error => {
+            console.error('Error storing analytics data:', error);
+            reject(error);
         });
-        console.log('Elasticsearch response:', response);
-        return response;
-    } catch (error) {
-        console.error('Error storing analytics data:', error);
-        throw error;
-    }
-  };
+    });
+};
 
-// Function to save the data back to opsi-data index
+export function storeFeedbackData(feedbackData) {
+    return new Promise((resolve, reject) => {
+        bonsaiClient.index({
+            index: 'feedback-data',
+            body: feedbackData,
+        })
+        .then(response => {
+            console.log('Elasticsearch response:', response);
+            resolve(response);
+        })
+        .catch(error => {
+            console.error('Error storing feedback data:', error);
+            reject(error);
+        });
+    });
+};
 
+// Example of checkIfVinExists
+export function checkIfVinExists(VIN) {
+    return new Promise((resolve, reject) => {
+        client.search({
+            index: 'opsi-data',
+            body: {
+                query: {
+                    match: { VIN }
+                }
+            }
+        }).then(response => {
+            const hits = response.hits.hits;
+            resolve(hits.length > 0);
+        }).catch(error => {
+            reject(error.message);
+        });
+    });
+}
+
+// Functions to save the data back to opsi-data index
+// Update vehicle data
+export function updateVehicleData(data) {
+    data.DR_score = 3;
+    return new Promise((resolve, reject) => {
+        client.updateByQuery({
+            index: 'opsi-data',
+            body: {
+                script: {
+                    source: "ctx._source = params.data",
+                    params: { data: data }
+                },
+                query: {
+                    term: { VIN: data.VIN }
+                }
+            }
+        }).then(function (response) {
+            resolve(response);
+        }).catch(function (error) {
+            reject(error.message);
+        });
+    });
+}
+
+// Insert vehicle data
+export function insertVehicleData(data) {
+    data.DR_score = 3;
+    return new Promise((resolve, reject) => {
+        client.index({
+            index: 'opsi-data',
+            body: data
+        }).then(function (response) {
+            resolve(response);
+        }).catch(function (error) {
+            reject(error.message);
+        });
+    });
+}

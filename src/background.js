@@ -1,8 +1,11 @@
 import {checkIfVinExists, updateVehicleData, insertVehicleData} from './components/elasticsearch.js';
 
+// The URL of the website we want to keep the time of
 const targetUrl = "https://register.svamz.com/siteadmin/home.php?page=vehicle&mode=insert&wizard=1";
 
+// Function to handle saving (updating or inserting new) vehicle data back to Elasticsearch
 const handleSave = (data) => {
+    data.DR_score = 3;
     if (data.VIN) {
         checkIfVinExists(data.VIN)
             .then(exists => {
@@ -32,21 +35,23 @@ const handleSave = (data) => {
     }
 };
 
+// When the targetUrl page is completely loaded, set the startTime
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     if (changeInfo.status === 'complete' && tab.active && tab.url.includes(targetUrl)) {
         chrome.storage.local.set({ startTime: new Date().toISOString() }, () => {
-            console.log('Start time set');
+            // console.log('Start time set');
         });
     }
 });
 
+// Listener for 'targetButtonClick', target button being the save form button on targetUrl page
 chrome.runtime.onMessage.addListener((request, sendResponse, tab) => {
     if (request.message === 'targetButtonClick') {
         if (tab.active && tab.url.includes(targetUrl)) {
             chrome.storage.local.get('startTime', (data) => {
                 if (data.startTime) {
                     const startTime = new Date(data.startTime);
-                    const endTime = new Date(); // Save the end time as a Date object
+                    const endTime = new Date();
                     const duration = ((endTime - startTime) / 1000).toFixed(2); // Calculate the duration in seconds with two decimal places
     
                     const timeKeeperData = {
@@ -67,13 +72,15 @@ chrome.runtime.onMessage.addListener((request, sendResponse, tab) => {
                 }
             });
             return true; // Required to indicate you will send a response asynchronously
-        } else {
-            const vehicleData = request.data;
-            handleSave(vehicleData);
-        }   
+        }
+        // No matter the page we on, we save back to ES
+        const vehicleData = request.data;
+        handleSave(vehicleData);  
     }
 });
 
+
+// Initialize to-be stored variables on install
 chrome.runtime.onInstalled.addListener(() => {
   chrome.storage.local.set({
     vin: '',
@@ -84,7 +91,7 @@ chrome.runtime.onInstalled.addListener(() => {
     vehicleDataGlobal: {},
     timeData: null,
     showFeedback: false,
-    timeKeeperData: null // Initialize timeKeeperData to null on install
+    timeKeeperData: null
   });
 });
 

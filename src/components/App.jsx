@@ -5,7 +5,7 @@ import Settings from './Settings.jsx';
 import { LanguageProvider } from './LanguageContext.jsx';
 
 function App() {
-    const [currentPage, setCurrentPage] = useState('main');
+    const [currentPage, setCurrentPage] = useState('main'); // Nastavi začetno stran na 'main'
 
     const handleSettingsClick = () => {
         setCurrentPage('settings');
@@ -18,11 +18,13 @@ function App() {
     return (
         <LanguageProvider>
             <div>
+                <Header 
+                    currentPage={currentPage} 
+                    onSettingsClick={handleSettingsClick} 
+                    onHomeClick={handleBackToMainClick} 
+                />
                 {currentPage === 'main' ? (
-                    <>
-                        <Header onSettingsClick={handleSettingsClick} />
-                        <Main />
-                    </>
+                    <Main />
                 ) : (
                     <Settings onBackClick={handleBackToMainClick} />
                 )}

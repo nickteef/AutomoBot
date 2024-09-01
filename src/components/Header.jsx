@@ -1,8 +1,9 @@
 import React, { useContext } from 'react';
 import LanguageContext from './LanguageContext.jsx';
 import './styles/Header.css';
+import { FaHome, FaCog } from "react-icons/fa";
 
-function Header({ onSettingsClick }) {
+function Header({ currentPage, onSettingsClick, onHomeClick }) {
     const { language, toggleLanguage } = useContext(LanguageContext);
 
     return (
@@ -15,10 +16,15 @@ function Header({ onSettingsClick }) {
                 </div>
                 <span className={`language ${language === 'ENG' ? 'selected' : ''}`}>ENG</span>
             </div>
-            <img src="./images/settings-icon.svg" alt="Settings Icon" className="settings-icon" onClick={onSettingsClick} />
+            <div className="header-actions">
+                {currentPage === 'main' ? (
+                     <FaCog className="header-icon" onClick={onSettingsClick} />
+                ) : (
+                    <FaHome className="header-icon" onClick={onHomeClick} />
+                )}
+            </div>
         </header>
     );
-};
+}
 
 export default Header;
-

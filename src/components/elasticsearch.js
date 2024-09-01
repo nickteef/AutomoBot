@@ -111,7 +111,7 @@ export function populateModelSelector(selectedBrand) {
                   unique_models: {
                       terms: {
                           field: 'commercialTag.keyword',
-                          size: 1000, // Adjust the size according to your needs
+                          size: 200, // Adjust the size according to your needs
                           order: {
                               _count: "desc"
                           }
@@ -224,7 +224,6 @@ export function checkIfVinExists(VIN) {
 // Functions to save the data back to opsi-data index
 // Update vehicle data
 export function updateVehicleData(data) {
-    data.DR_score = 3;
     return new Promise((resolve, reject) => {
         client.updateByQuery({
             index: 'opsi-data',
@@ -247,7 +246,6 @@ export function updateVehicleData(data) {
 
 // Insert vehicle data
 export function insertVehicleData(data) {
-    data.DR_score = 3;
     return new Promise((resolve, reject) => {
         client.index({
             index: 'opsi-data',

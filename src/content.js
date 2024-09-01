@@ -124,6 +124,7 @@ function stringDistance(a, b) {
     return distance;
 }
 
+// Function that listens to autofill
 document.addEventListener('AutomoBotAutofill', function(e) {
   const data = e.detail;
   fillForm(data);

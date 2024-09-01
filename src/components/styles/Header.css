@@ -62,8 +62,19 @@
 }
 
 /* Settings icon styles */
-.settings-icon {
+.header-icon {
     width: 27px; /* Adjusted width */
     height: 27px; /* Adjusted height */
     cursor: pointer;
+    color: #fff;
+}
+
+/* .header-icon {
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: 15px;
+} */
+
+.header-icon:hover {
+    color: #0056b3; /* Ali katera druga barva ob hoverju */
 }

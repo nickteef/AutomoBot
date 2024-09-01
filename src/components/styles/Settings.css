@@ -1,0 +1,100 @@
+/* Settings.css */
+
+/* Glavni kontejner za nastavitve */
+.settings-container {
+    background-color: #ffffff; /* Bele ozadje za kontrast */
+    padding: 20px;
+    border-radius: 8px;
+    width: 80%; /* Ali druga širina, ki jo potrebujete */
+    margin: auto; /* Središčna postavitev */
+    max-width: 800px; /* Maksimalna širina, da ne preseže širine zaslona */
+}
+
+/* Naslov nastavitve */
+.settings-title {
+    color: #333; /* Temno siva barva besedila */
+    font-size: 24px;
+    margin-bottom: 15px;
+}
+
+/* Dodajte dodatne sloge za druge elemente nastavitve */
+.settings-content {
+    font-size: 16px; /* Primer velikosti pisave */
+    color: #666; /* Svetlejša siva barva besedila */
+    margin-bottom: 20px;
+}
+
+/* Slog za polja z nastavitvami */
+.settings-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 0;
+    border-bottom: 1px solid #eee;
+    cursor: pointer;
+}
+
+.settings-item:last-child {
+    border-bottom: none;
+}
+
+.settings-arrow {
+    width: 16px;
+    height: 16px;
+    margin-left: 10px;
+}
+
+/* Toggle stikalo */
+.settings-toggle {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.toggle-thumb {
+    width: 30px;
+    height: 16px;
+    background-color: #ccc;
+    border-radius: 16px;
+    position: relative;
+    transition: background-color 0.3s;
+}
+
+.toggle-thumb.on {
+    background-color: #10315D;
+}
+
+.toggle-thumb:before {
+    content: '';
+    width: 14px;
+    height: 14px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px;
+    left: 1px;
+    transition: transform 0.3s;
+}
+
+.toggle-thumb.on:before {
+    transform: translateX(14px);
+}
+
+/* Nazaj gumb */
+.back-button-container {
+    display: flex;
+    align-items: center;
+    margin-top: 20px;
+    cursor: pointer;
+}
+
+.back-button-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+}
+
+.back-button-text {
+    font-size: 16px;
+    color: #10315D;
+}

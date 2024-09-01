@@ -1,0 +1,84 @@
+.feedback-container {
+    text-align: center;
+    margin: 20px;
+}
+
+.ratings {
+    display: flex;
+    justify-content: space-around;
+    margin: 20px 0;
+}
+
+.rating-box {
+    cursor: pointer;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.rating-box.selected {
+    background-color: #e0e0e0;
+    border-color: #333;
+}
+
+.suggestion-button {
+    font-family: "Rubik", sans-serif;
+    font-size: 12px;
+    cursor: pointer;
+    margin: 5px 5px;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    transition: background-color 0.3s, border-color 0.3s;
+}
+
+.suggestion-button.selected {
+    background-color: #e0e0e0;
+    border-color: #333;
+}
+
+.emoji {
+    font-size: 24px;
+    display: block;
+}
+
+.additional-feedback {
+    margin: 10px 0;
+}
+
+#feedback-text {
+    font-family: "Rubik", sans-serif;
+    width: 80%;
+    padding: 10px;
+    margin-top: 10px;
+}
+
+label {
+    font-size: 14px;
+}
+
+.submit-button {
+    font-family: "Rubik", sans-serif;
+    padding: 10px 20px;
+    background-color: #10315D;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-top: 20px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+.submit-button:disabled {
+    cursor: not-allowed !important;
+    opacity: 0.5 !important;
+    pointer-events: none !important;
+}
+
+.submit-button:hover {
+    background-color: #0056b3;
+}
+
+

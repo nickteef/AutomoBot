@@ -1,0 +1,80 @@
+/* Make the header span the full width of the popup */
+.header {
+    background-color: #10315D;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 15px 10px;
+    width: 100%;
+    box-sizing: border-box; /* Ensure padding is included in the width calculation */
+}
+
+/* Logo styles */
+.logo-text {
+    height: 27px; /* Adjusted for better visibility */
+    margin-right: 30px;
+    display: flex;
+    align-items: center;
+    margin-top: 0px;
+}
+
+/* Language toggle styles */
+.language-toggle {
+    display: flex;
+    margin-right: 10px; /* Reduced margin */
+}
+
+.language {
+    color: #fff;
+    margin: 0 5px; /* Reduced margin */
+    font-size: 14px; /* Adjusted font size for smaller appearance */
+}
+
+.language.selected {
+    color:#0FDBFB;
+}
+
+.toggle {
+    width: 32px; /* Reduced width */
+    height: 16px; /* Reduced height */
+    background-color: #0FDBFB;
+    border-radius: 16px;
+    position: relative;
+    cursor: pointer;
+}
+
+.thumb {
+    width: 14.4px; /* Reduced thumb size */
+    height: 14.4px;
+    background-color: #10315D;
+    border-radius: 50%;
+    position: absolute;
+    top: 1px; /* Adjusted top position */
+    transition: transform 0.3s;
+}
+
+.thumb.left {
+    transform: translateX(1px); /* Adjusted translate values */
+}
+
+.thumb.right {
+    transform: translateX(16px); /* Adjusted translate values */
+}
+
+/* Settings icon styles */
+.header-icon {
+    width: 27px; /* Adjusted width */
+    height: 27px; /* Adjusted height */
+    cursor: pointer;
+    color: #fff;
+}
+
+/* .header-icon {
+    font-size: 24px;
+    cursor: pointer;
+    margin-left: 15px;
+} */
+
+.header-icon:hover {
+    color: #0056b3; /* Ali katera druga barva ob hoverju */
+}

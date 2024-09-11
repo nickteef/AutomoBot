@@ -66,7 +66,7 @@ export async function fillForm(data) {
   if (length) length.value = data["length"] || '/';
   if (height) height.value = data.height || '/';
   if (width) width.value = data.width || '/';
-  if (engineConstruction) autofillSelectBox(engineConstruction, data.fuelType); // Here we must add data.engineConstruction
+  if (engineConstruction) autofillSelectBox(engineConstruction, data.engineConstruction);
   if (valveNum) valveNum.value = data.valveNum || '/';
   if (valveArrangement) autofillSelectBox(valveArrangement, data.valveArrangement);
   if (engineCapacity) engineCapacity.value = data.engineDisplacement || '/';  
@@ -195,7 +195,6 @@ function gatherFormData() {
     lighting: getSelectedText(document.querySelector('select[name="lightning"]')),
   };
 }
-
 
 // Check if the DOM is fully loaded
 if (document.readyState === 'loading') {

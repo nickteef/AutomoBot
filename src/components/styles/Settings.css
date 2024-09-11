@@ -1,26 +1,25 @@
-/* Settings.css */
-
 /* Glavni kontejner za nastavitve */
 .settings-container {
-    background-color: #ffffff; /* Bele ozadje za kontrast */
+    background-color: var(--bg-color);
+    color: var(--text-color);
     padding: 20px;
     border-radius: 8px;
-    width: 80%; /* Ali druga širina, ki jo potrebujete */
-    margin: auto; /* Središčna postavitev */
-    max-width: 800px; /* Maksimalna širina, da ne preseže širine zaslona */
+    width: 80%;
+    margin: auto;
+    max-width: 800px;
 }
 
 /* Naslov nastavitve */
 .settings-title {
-    color: #333; /* Temno siva barva besedila */
+    color: var(--text-color);
     font-size: 24px;
     margin-bottom: 15px;
 }
 
 /* Dodajte dodatne sloge za druge elemente nastavitve */
 .settings-content {
-    font-size: 16px; /* Primer velikosti pisave */
-    color: #666; /* Svetlejša siva barva besedila */
+    font-size: 16px;
+    color: var(--secondary-text-color);
     margin-bottom: 20px;
 }
 
@@ -30,7 +29,7 @@
     justify-content: space-between;
     align-items: center;
     padding: 10px 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--border-color);
     cursor: pointer;
 }
 
@@ -54,14 +53,14 @@
 .toggle-thumb {
     width: 30px;
     height: 16px;
-    background-color: #ccc;
+    background-color: var(--toggle-bg-color);
     border-radius: 16px;
     position: relative;
     transition: background-color 0.3s;
 }
 
 .toggle-thumb.on {
-    background-color: #10315D;
+    background-color: var(--toggle-active-bg-color);
 }
 
 .toggle-thumb:before {
@@ -96,5 +95,26 @@
 
 .back-button-text {
     font-size: 16px;
-    color: #10315D;
+    color: var(--primary-color);
+}
+
+/* CSS za svetli in temni način */
+:root {
+    --bg-color: #ffffff;
+    --text-color: #333;
+    --secondary-text-color: #666;
+    --border-color: #eee;
+    --toggle-bg-color: #ccc;
+    --toggle-active-bg-color: #10315D;
+    --primary-color: #10315D;
+}
+
+[data-theme="dark"] {
+    --bg-color: #10315D;
+    --text-color: #e0e0e0;
+    --secondary-text-color: #a1a1a1;
+    --border-color: #333;
+    --toggle-bg-color: #555;
+    --toggle-active-bg-color: #1f6feb;
+    --primary-color: #1f6feb;
 }

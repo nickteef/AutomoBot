@@ -1,4 +1,4 @@
-A web application for automating the search and entry of vintage vehicle data
+A web application for automating the search and entry of vintage vehicle data. Developed as part of the Bachelor's thesis (https://repozitorij.uni-lj.si/IzpisGradiva.php?id=160937&lang=slv).
 
 Screenshots:
 
